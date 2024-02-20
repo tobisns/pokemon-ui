@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from 'next/navigation'
 import axios from "axios";
 import PokemonWidget from "../../../components/widgets/pokemon-widget";
 
@@ -24,12 +23,16 @@ export default function Page({ params }: { params: { name: string } }) {
 
     const [evolveFrom, setEvolveFrom] = useState<SpeciesData[]>([]);
     const [evolveTo, setEvolveTo] = useState<SpeciesData[]>([]); 
+    const [weight, setWeight] = useState("");
+    const [height, setHeight] = useState("");
 
     var count = 0;
 
     useEffect(() => {
         axios.get(`${API}/pokemon/${params.name}`)
             .then((res) => {
+                setWeight(res.data.weight);
+                setHeight(res.data.height)
                 return res.data.species.url;
             })
             .then((speciesUrl) => {
@@ -92,13 +95,24 @@ export default function Page({ params }: { params: { name: string } }) {
 
     return (
         <>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 grid-rows-3 md:grid-rows-2 gap-4 h-5/6 w-4/5 mx-auto">
-            {evolveFrom &&
-            evolveFrom.map((pokemon) => {if(pokemon.species.name != params.name) {return <PokemonWidget key={pokemon.species.name} name={pokemon.species.name}/>}})}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 grid-rows-3 md:grid-rows-2 gap-4 h-5/6 w-4/5 mx-auto bg-black">
-            {evolveTo &&
-            evolveTo.map((pokemon) => {if(pokemon.species.name != params.name) {return <PokemonWidget key={pokemon.species.name} name={pokemon.species.name}/>}})}    
+        <PokemonWidget key={params.name} name={params.name}/>
+        <h1>
+        Height: {height}
+        </h1>
+        <h1>
+        Weight: {weight}
+        </h1>
+        <div className="flex">
+            <div className="mx-auto">
+                Evolution from:
+                {evolveFrom &&
+                evolveFrom.map((pokemon) => {if(pokemon.species.name != params.name) {return <PokemonWidget key={pokemon.species.name} name={pokemon.species.name}/>}})}
+            </div>
+            <div className="mx-auto">
+                Evolve to:
+                {evolveTo &&
+                evolveTo.map((pokemon) => {if(pokemon.species.name != params.name) {return <PokemonWidget key={pokemon.species.name} name={pokemon.species.name}/>}})}    
+            </div>
         </div>
         </>
     )

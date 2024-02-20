@@ -25,7 +25,8 @@ export default function PokemonWidget(props : PropsWithChildren<Pokemon>) {
 
     return (
         <>
-            <div key={name} className="bg-pink-100 row-span-1 col-span-1 min-h-80 align-middle justify-center content-center text-center">
+        <a href={`/details/${name}`}>
+        <div key={name} className="bg-pink-100 row-span-1 col-span-1 min-h-80 align-middle justify-center content-center text-center">
                 <img
                 alt={name}
                 src={imageUrl}
@@ -33,6 +34,7 @@ export default function PokemonWidget(props : PropsWithChildren<Pokemon>) {
                 />
                 {name}
             </div>
+        </a>
         </>
     )
 }
