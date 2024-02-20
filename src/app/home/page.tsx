@@ -11,7 +11,6 @@ import PokemonWidget from "../../components/widgets/pokemon-widget";
 export default function Page() {
     type PokemonData = {
         name: string;
-        url: string;
     }
 
     const API = process.env.API;
@@ -20,6 +19,7 @@ export default function Page() {
     const [items, setItems] = useState<PokemonData[]>([]);
     const [hasMore, setHasMore] = useState(true);
     const [index, setIndex] = useState(1);
+    const [query, setQuery] = useState("");
 
     useEffect(() => {
         // refresh scroll
@@ -48,13 +48,39 @@ export default function Page() {
         
     };
 
+    useEffect(() => {
+        if(query){
+            setItems([]);
+            const getData = setTimeout(() => {
+                axios.get(`${API}/pokemon/${query}`,
+                {
+
+                }).then((res) => {
+                    setItems([res.data]);
+                    setIndex(0);
+                    setHasMore(true);
+                }).catch((err) => {
+                    setItems([]);
+                    setIndex(0);
+                    console.log(err);
+                });
+            }, 666);
+            
+            return () => clearTimeout(getData); 
+        } else {
+            fetchMoreData();
+        } 
+      }, [query]);
+
+
 
     return (
         <div>
             <div className="fixed w-full bg-black sm:pt-12 pb-8 p-4 sm:p-12 z-10">
                 <input
                 type="text"
-                placeholder="Search..."
+                onChange={(e) => {setQuery(e.target.value);setHasMore(false)}}
+                placeholder="Search...?!!!"
                 className="bg-white-700 text-black p-2 rounded w-5/6 sm:w-96"
                 />
             </div>
@@ -66,9 +92,9 @@ export default function Page() {
             loader={<h4>Loading...</h4>}
             >
                 <div className="mt-21 sm:p-12 pt-20 sm:pt-[137px] bg-black min-h-screen">
-                <div className="grid grid-cols-2 md:grid-cols-3 grid-rows-3 md:grid-rows-2 gap-4 h-5/6 w-4/5 mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 grid-rows-3 md:grid-rows-2 gap-4 h-5/6 w-4/5 mx-auto">
                     {items &&
-                    items.map((pokemon) => <PokemonWidget key={pokemon.name} name={pokemon.name} url={pokemon.url}/>)}
+                    items.map((pokemon) => <PokemonWidget key={pokemon.name} name={pokemon.name}/>)}
                 </div>
                 </div>
             </InfiniteScroll>

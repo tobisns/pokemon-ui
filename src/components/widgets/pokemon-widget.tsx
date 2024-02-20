@@ -2,16 +2,18 @@ import { PropsWithChildren, useState } from "react";
 import axios from "axios";
 
 interface Pokemon {
-    name: string;
-    url?: string;
+    name?: string;
 };
 
 export default function PokemonWidget(props : PropsWithChildren<Pokemon>) {
-    const {children, name, url} = props;
+    const {children, name} = props;
     const [ imageUrl, setImageUrl ] = useState("");
 
-    if(url) {
-        axios.get(`${url}`,
+    const API = process.env.API;
+
+
+    if(name) {
+        axios.get(`${API}/pokemon/${name}`,
         {
 
         }).then((res) => {
@@ -23,12 +25,13 @@ export default function PokemonWidget(props : PropsWithChildren<Pokemon>) {
 
     return (
         <>
-            <div key={name} className="bg-pink-100 row-span-1 col-span-1 min-h-80">
+            <div key={name} className="bg-pink-100 row-span-1 col-span-1 min-h-80 align-middle justify-center content-center text-center">
                 <img
                 alt={name}
                 src={imageUrl}
-                className="group-hover:opacity-75"
+                className="group-hover:opacity-75 size-60 mx-auto"
                 />
+                {name}
             </div>
         </>
     )
