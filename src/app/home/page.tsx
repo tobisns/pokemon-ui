@@ -13,10 +13,15 @@ export default function Page() {
         name: string;
     }
 
+    type TypesData = {
+        name: string;
+    }
+
     const API = process.env.API;
     const limit = 20;
 
     const [items, setItems] = useState<PokemonData[]>([]);
+    const [types, setTypes] = useState<TypesData[]>([]);
     const [hasMore, setHasMore] = useState(true);
     const [index, setIndex] = useState(1);
     const [query, setQuery] = useState("");
@@ -31,6 +36,14 @@ export default function Page() {
             
         }).then((res) => {
             setItems(res.data.results);
+        }).catch((err) => {
+            console.log(err);
+        });
+        axios.get(`${API}/type`,
+        {
+            
+        }).then((res) => {
+            setTypes(res.data.results);
         }).catch((err) => {
             console.log(err);
         });
@@ -70,7 +83,7 @@ export default function Page() {
             }, 666);
             
             return () => clearTimeout(getData); 
-        } else if (filter) {
+        } else if (filter && !query) {
             window.scrollTo(0, 0);
             const getData = setTimeout(() => {
                 axios.get(`${API}/type/${filter}`,
@@ -134,15 +147,10 @@ export default function Page() {
                     <option value="all">
                         All
                     </option>
-                    <option value="normal">
-                        Normal
-                    </option>
-                    <option value="fighting">
-                        Fighting
-                    </option>
-                    <option value="flying">
-                        Flying
-                    </option>
+                    {types &&
+                    types.map((type) => <option value={type.name}>
+                        {type.name}
+                    </option>)}
                 </select>
             </div>
             <React.StrictMode>

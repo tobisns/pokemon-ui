@@ -20,12 +20,18 @@ export default function Page({ params }: { params: { name: string } }) {
         name: string;
     }
 
+    type StatData = {
+        name: string;
+        value: number;
+    }
+
 
 
     const [evolveFrom, setEvolveFrom] = useState<SpeciesData[]>([]);
     const [evolveTo, setEvolveTo] = useState<SpeciesData[]>([]); 
     const [sameTypes, setSameTypes] = useState<PokemonData[]>([]);
     const [types, setTypes] = useState<TypeData[]>([]);
+    const [statData, setStatData] = useState<StatData[]>([]);
     const [weight, setWeight] = useState("");
     const [height, setHeight] = useState("");
 
@@ -37,6 +43,7 @@ export default function Page({ params }: { params: { name: string } }) {
                 setWeight(res.data.weight);
                 setHeight(res.data.height);
                 get_same_types(res.data.types);
+                get_stats(res.data.stats);
                 return res.data.species.url;
             })
             .then((speciesUrl) => {
@@ -139,6 +146,15 @@ export default function Page({ params }: { params: { name: string } }) {
               });
     }
 
+    function get_stats(stats){
+        const statsInfo = stats.map(item => ({
+            name: item.stat.name,
+            value: item.base_stat
+          }));
+        
+        setStatData(statsInfo);
+    }
+
 
     return (
         <>
@@ -155,6 +171,21 @@ export default function Page({ params }: { params: { name: string } }) {
                 {types &&
                 types.map((type) => <li>{type.name}</li>)}
             </h1>
+        </div>
+        <div className="flex-1 border-dashed border-2 border-black m-5 mr-10 ml-10 p-2">
+                    Stats:
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 h-5/6 w-4/5 mx-auto p-5">
+                {statData &&
+                statData.map((stat) =>
+                 <div className="row-span-1 col-span-1 justify-center content-center text-center">
+                    
+                    <pre>
+                        {stat.name+" :\n"}
+                        {stat.value}
+                    </pre>
+                    
+                 </div>)}
+            </div>
         </div>
         <div className="flex m-10">
             <div className="flex-1 border-dashed border-2 border-black mr-5 pb-5">
