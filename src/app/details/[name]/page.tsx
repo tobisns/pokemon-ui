@@ -35,7 +35,7 @@ export default function Page({ params }: { params: { name: string } }) {
     const [weight, setWeight] = useState("");
     const [height, setHeight] = useState("");
 
-    var count = 0;
+    let count = 0;
 
     useEffect(() => {
         axios.get(`${API}/pokemon/${params.name}`)
@@ -80,9 +80,9 @@ export default function Page({ params }: { params: { name: string } }) {
     }, [sameTypes]);
 
     function check_evolves_from(evoData){
-        var evofrom = evoData.species.name != params.name;
-        var evoToDat = [];
-        var evoFromDat = [];
+        let evofrom = evoData.species.name != params.name;
+        let evoToDat = [];
+        let evoFromDat = [];
 
         console.log(evofrom);
 
@@ -118,8 +118,8 @@ export default function Page({ params }: { params: { name: string } }) {
 
           setTypes(typesUrl);
 
-          var sameTypePokemons = [];
-          var promises = [];
+          let sameTypePokemons = [];
+          let promises = [];
           
           typesUrl.forEach(element => {
               const promise = axios.get(`${element.url}`)

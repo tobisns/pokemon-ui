@@ -104,7 +104,8 @@ export default function Page() {
                     console.log(err);
                 });
             }, 666);
-        } else if(items.length == 0) {
+        } else {
+            setItems([]);
             fetchMoreData();
         } 
 
@@ -118,7 +119,6 @@ export default function Page() {
                 <input
                 type="text"
                 /// <reference " />
-                
                 onChange={(e) => {
                     if(e.target.value.trim()){
                         console.log("??")
