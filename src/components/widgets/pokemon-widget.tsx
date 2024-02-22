@@ -1,16 +1,17 @@
 import { PropsWithChildren, useState } from "react";
 import axios from "axios";
+import { cn } from "../../utils/cn";
+import React from "react";
 
-interface Pokemon {
+interface Pokemon extends React.HTMLAttributes<HTMLDivElement> {
     name?: string;
 };
 
-export default function PokemonWidget(props : PropsWithChildren<Pokemon>) {
-    const {children, name} = props;
+export const PokemonWidget = React.forwardRef<HTMLDivElement, Pokemon> (
+    ({ className, name, ...props }, ref) =>  {
     const [ imageUrl, setImageUrl ] = useState("");
 
     const API = process.env.API;
-
 
     if(name) {
         axios.get(`${API}/pokemon/${name}`,
@@ -26,15 +27,15 @@ export default function PokemonWidget(props : PropsWithChildren<Pokemon>) {
     return (
         <>
         <a href={`/details/${name}`}>
-        <div key={name} className="bg-pink-100 row-span-1 col-span-1 min-h-80 align-middle justify-center content-center text-center">
+        <div key={name} className={cn("row-span-1 col-span-1 align-middle justify-center content-center text-center", className)}>
                 <img
                 alt={name}
                 src={imageUrl}
-                className="group-hover:opacity-75 size-60 mx-auto"
+                className="group-hover:opacity-75 mx-auto size-60 h-full"
                 />
-                {name}
+                <div className="truncate ...">{name}</div>  
             </div>
         </a>
         </>
     )
-}
+});
