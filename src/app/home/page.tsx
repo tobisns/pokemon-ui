@@ -1,21 +1,18 @@
 "use client";
 
-import axios from "axios";
 import React from "react";
 import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import {PokemonWidget} from "../../components/widgets/pokemon-widget";
+import { get_filtered_pokemon } from "../../services/filter";
+import PokemonData from "../../interface/pokemon";
+import { fetch_pokemon_data, fetch_types_data } from "../../services/fetch";
+import { get_query_pokemon } from "../../services/query";
+import TypesData from "../../interface/types";
 
 
 
 export default function Page() {
-    type PokemonData = {
-        name: string;
-    }
-
-    type TypesData = {
-        name: string;
-    }
 
     const API = process.env.API;
     const limit = 20;
@@ -26,92 +23,81 @@ export default function Page() {
     const [index, setIndex] = useState(1);
     const [query, setQuery] = useState("");
     const [filter, setFilter] = useState("");
-
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // refresh scroll
         window.scrollTo(0, 0);
-        axios.get(`${API}/pokemon?limit=${limit}&offset=0`,
-        {
-            
-        }).then((res) => {
-            setItems(res.data.results);
-        }).catch((err) => {
-            console.log(err);
-        });
-        axios.get(`${API}/type`,
-        {
-            
-        }).then((res) => {
-            setTypes(res.data.results);
-        }).catch((err) => {
-            console.log(err);
-        });
+        const fetch_data = async () => {
+            try {
+                const pokemonData = await fetch_pokemon_data(limit, 0);
+                setItems(pokemonData);
+                setLoading(false);
+
+                const typeData = await fetch_types_data();
+                setTypes(typeData);
+
+
+            } catch(err) {
+                console.log(err);
+                setLoading(false);
+
+            }
+        }
+        
+        fetch_data();
     }, []);
 
     
-    const fetchMoreData = () => {
-        axios.get(`${API}/pokemon?limit=${limit}&offset=${index*limit}`,
-        {
-            
-        }).then((res) => {
-            setItems((prevItems) => [...prevItems, ...res.data.results]);
+    const fetchMoreData = async () => {
+        try {
+            const pokemonData = await fetch_pokemon_data(limit, index);
+            setItems((prevItems) => [...prevItems, ...pokemonData]);
             setIndex((prevIndex) => prevIndex + 1);
-            res.data.results.length > 0 ? setHasMore(true) : setHasMore(false);
-        }).catch((err) => {
+            pokemonData.length > 0 ? setHasMore(true) : setHasMore(false);
+        } catch(err) {
             console.log(err);
-        });
-        
+        }        
     };
     
     useEffect(() => {
         if(query && query.trim()){
             window.scrollTo(0, 0);
             console.log(query);
-            const getData = setTimeout(() => {
-                axios.get(`${API}/pokemon/${query}`,
-                {
-                    
-                }).then((res) => {
+            const getData = setTimeout(async () => {
+                try {
+                    const pokemonData = await get_query_pokemon(query);
                     setIndex(0);
-                    setItems([res.data]);
-                }).catch((err) => {
+                    setItems(pokemonData);
+                } catch(err) {
                     setIndex(0);
                     setItems([]);
                     console.log(err);
-                });
+                }
             }, 666);
             
             return () => clearTimeout(getData); 
         } else if (filter && !query) {
             window.scrollTo(0, 0);
-            const getData = setTimeout(() => {
-                axios.get(`${API}/type/${filter}`,
-                {
-                    
-                }).then((res) => {
-                    const updatedPokemonArray = res.data.pokemon.map(item => ({
-                        name: item.pokemon.name,
-                        url: item.pokemon.url
-                      }));
-
-                    console.log(updatedPokemonArray)
+            const getData = setTimeout(async () => {
+                try {
+                    const updatedPokemonArray = await get_filtered_pokemon(filter);
                     setItems(updatedPokemonArray);
-                    setIndex(0);
-                }).catch((err) => {
+                } catch(err) {
                     setIndex(0);
                     setItems([]);
                     console.log(err);
-                });
+                }
             }, 666);
+            return () => clearTimeout(getData); 
         } else {
             setItems([]);
+            setIndex(0)
             fetchMoreData();
         } 
 
 
     }, [query, filter]);
-
 
     return (
         <div>
@@ -154,6 +140,9 @@ export default function Page() {
                 </select>
             </div>
             <React.StrictMode>
+            {loading? (
+                 <div>loading...</div>
+            ) : ( 
             <InfiniteScroll
             dataLength={items.length}
             next={fetchMoreData}
@@ -166,7 +155,9 @@ export default function Page() {
                     items.map((pokemon) => <PokemonWidget className="bg-gray-400 border-double border-2 border-white" key={pokemon.name} name={pokemon.name}/>)}
                 </div>
                 </div>
-            </InfiniteScroll>
+            </InfiniteScroll> 
+            )
+            }
             </React.StrictMode>
         </div>
     );
