@@ -9,6 +9,7 @@ import PokemonData from "../../interface/pokemon";
 import { fetch_pokemon_data, fetch_types_data } from "../../services/fetch";
 import { get_query_pokemon } from "../../services/query";
 import TypesData from "../../interface/types";
+import {ClipLoader} from "react-spinners"
 
 
 
@@ -141,7 +142,12 @@ export default function Page() {
             </div>
             <React.StrictMode>
             {loading? (
-                 <div>loading...</div>
+                <div className="flex items-center justify-center min-h-screen bg-black text-blue-50">
+                    <div className="flex items-center justify-center">
+                        <ClipLoader color="#ffffff" />
+                    </div>
+                </div>
+            
             ) : ( 
             <InfiniteScroll
             dataLength={items.length}
