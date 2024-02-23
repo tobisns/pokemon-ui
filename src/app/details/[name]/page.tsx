@@ -76,22 +76,75 @@ export default function Page({ params }: { params: PokemonData }) {
         fetch_data();
     }, []);
 
+    const loadingPage = () => {
+        return (
+            <>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="flex items-center justify-center">
+                        <ClipLoader color="#000000" />
+                    </div>
+                </div>
+                
+            </>
+        )
+    }
+
+    const notFoundPage = () => {
+
+        return(
+            <>
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="flex items-center justify-center text-center">
+                    POKEMON NOT FOUND
+                </div>
+            </div>
+            </>
+        )
+    }
+
+    const spawnStats = () => {
+        return (
+            <>
+            {statData &&
+                statData.map((stat) =>
+                <div className="row-span-1 col-span-1 justify-center content-center text-center">
+                    
+                    <pre>
+                        {stat.name+" :\n"}
+                        {stat.value}
+                    </pre>
+                    
+                 </div>)}
+            </>
+        )
+    }
+
+    const spawnEvolData = (pokemonData : SpeciesData[]) => {
+        return (
+            <>
+                {pokemonData &&
+                pokemonData.map((pokemon) => {if(pokemon.species.name != params.name) {return <PokemonWidget className="max-h-20 max-w-20" key={pokemon.species.name} name={pokemon.species.name}/>}})}
+            </>
+        )
+    }
+
+    const spawnPokemonWidgets = (pokemonData: PokemonData[]) => {
+        return (
+            <>
+                {pokemonData &&
+                pokemonData.map((pokemon) => <PokemonWidget className="max-h-20 max-w-20" key={pokemon.name} name={pokemon.name}/>)}
+            </>
+        )
+    }
+
     return (
         <>
         {loading? (
             <>
             {!notFound? (
-                <div className="flex items-center justify-center min-h-screen">
-                <div className="flex items-center justify-center">
-                    <ClipLoader color="#000000" />
-                </div>
-            </div>
+                loadingPage()
             ) : (
-                <div className="flex items-center justify-center min-h-screen">
-                <div className="flex items-center justify-center text-center">
-                    POKEMON NOT FOUND
-                </div>
-            </div>
+                notFoundPage()  
             )}
                 
             </>
@@ -114,31 +167,20 @@ export default function Page({ params }: { params: PokemonData }) {
         <div className="flex-1 border-dashed border-2 border-black m-5 mr-10 ml-10 p-2">
                     Stats:
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 h-5/6 w-4/5 mx-auto p-5">
-                {statData &&
-                statData.map((stat) =>
-                <div className="row-span-1 col-span-1 justify-center content-center text-center">
-                    
-                    <pre>
-                        {stat.name+" :\n"}
-                        {stat.value}
-                    </pre>
-                    
-                 </div>)}
+                {spawnStats()}
             </div>
         </div>
         <div className="flex m-10">
             <div className="flex-1 border-dashed border-2 border-black mr-5 pb-5">
             <div className="mx-auto p-2">Evolution from:</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 h-5/6 w-4/5 mx-auto pb-5">
-                {evolveFrom &&
-                evolveFrom.map((pokemon) => {if(pokemon.species.name != params.name) {return <PokemonWidget className="max-h-20 max-w-20" key={pokemon.species.name} name={pokemon.species.name}/>}})}
+                {spawnEvolData(evolveFrom)}
             </div>
             </div>
             <div className=" flex-1 border-dashed border-2 border-black ml-5 pb-5">
             <div className="mx-auto p-2">Evolve to:</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 h-5/6 w-4/5 mx-auto pb-5">
-                {evolveTo &&
-                evolveTo.map((pokemon) => {if(pokemon.species.name != params.name) {return <PokemonWidget className="max-h-20 max-w-20" key={pokemon.species.name} name={pokemon.species.name}/>}})}    
+                {spawnEvolData(evolveTo)}    
             </div>
             </div>
         </div>
