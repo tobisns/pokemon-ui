@@ -10,5 +10,14 @@ module.exports = {
           aggregateTimeout: 300,   // delay before rebuilding
         };
         return config;
+    },
+    redirects: () => {
+      return [
+        {
+          source: '/',
+          destination: '/home',
+          permanent: true,
+        },
+      ];
     }
   }

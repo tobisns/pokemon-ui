@@ -1,20 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {PokemonWidget} from "../../../components/widgets/pokemon-widget";
+import { fetch_evolution_chain, fetch_pokemon_details, fetch_same_types_pokemon_data } from "../../../services/fetch";
+import PokemonData from "../../../interface/pokemon";
+import { SpeciesData } from "../../../interface/evolution";
+import { ClipLoader } from "react-spinners";
 
 
-export default function Page({ params }: { params: { name: string } }) {
-    const API = process.env.API;
-
-    type PokemonData = {
-        name: string;
-    }
-
-    type SpeciesData = {
-        species: PokemonData;
-    }
+export default function Page({ params }: { params: PokemonData }) {
 
     type TypeData = {
         name: string;
@@ -34,129 +28,74 @@ export default function Page({ params }: { params: { name: string } }) {
     const [statData, setStatData] = useState<StatData[]>([]);
     const [weight, setWeight] = useState("");
     const [height, setHeight] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
 
-    let count = 0;
 
     useEffect(() => {
-        axios.get(`${API}/pokemon/${params.name}`)
-            .then((res) => {
-                setWeight(res.data.weight);
-                setHeight(res.data.height);
-                get_same_types(res.data.types);
-                get_stats(res.data.stats);
-                return res.data.species.url;
-            })
-            .then((speciesUrl) => {
-                axios.get(`${speciesUrl}`,
-                {
+        const fetch_data = async () => {
+            try {
+                const res: any = await fetch_pokemon_details(params);
+                if(res) {
+                    setLoading(false);
+                    setWeight(res.data.weight);
+                    setHeight(res.data.height);
 
-                }).then((res) => {
-                    return res.data.evolution_chain.url;          
-                }).then((evoChainUrl) => {
-                    axios.get(`${evoChainUrl}`,
-                    {
+                    const statsInfo = res.data.stats.map(item => ({
+                        name: item.stat.name,
+                        value: item.base_stat
+                    }));
+                    setStatData(statsInfo);
 
-                    }).then((res) => {
-                        if(count <= 0){
-                            count++;
-                            check_evolves_from(res.data.chain);
-                        }
-                    }).catch((err) => {
-                        console.log(err);
-                    });
-                }).catch((err) => {
-                    console.log(err);
-                });
-            })
-            .catch((err) => {
-            console.log(err);
-            });
+
+                    const typesUrl = res.data.types.map(item => ({
+                        url: item.type.url,
+                        name: item.type.name
+                    }));
+                    setTypes(typesUrl);
+                    
+                    const evoData = await fetch_evolution_chain(res.data.species.url, params);
+                    if(evoData) {
+                        setEvolveFrom(evoData.evolFrom);
+                        setEvolveTo(evoData.evolTo);
+                    }
+                    
+                    const sameTypePokemons = await fetch_same_types_pokemon_data(typesUrl);
+                    if(sameTypePokemons){
+                        setSameTypes(sameTypePokemons);
+                    }
+
+                }
+
+                setNotFound(true);
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        fetch_data();
     }, []);
 
-    useEffect(() => {
-        if(sameTypes){
-            console.log(sameTypes)
-        }
-    }, [sameTypes]);
-
-    function check_evolves_from(evoData){
-        let evofrom = evoData.species.name != params.name;
-        let evoToDat = [];
-        let evoFromDat = [];
-
-        console.log(evofrom);
-
-        if(evofrom) {
-            evoFromDat.push(evoData);
-        } else {
-            evoToDat.push(evoData);
-        }
-
-        evoData = evoData.evolves_to
-
-        while(evoData.length > 0) {
-            if(evofrom) {
-                evofrom = !evoData.find(pokemon => pokemon.species.name == params.name)
-                if(evofrom){evoFromDat.push(...evoData);}
-                
-            } else {
-                evoToDat.push(...evoData);
-            }
-            evoData = evoData[0].evolves_to
-        } 
-        
-        setEvolveFrom((prevItems) => [...prevItems, ...evoFromDat])
-        setEvolveTo((prevItems) => [...prevItems, ...evoToDat])
-
-    }
-
-    function get_same_types(types) {
-        const typesUrl = types.map(item => ({
-            url: item.type.url,
-            name: item.type.name
-          }));
-
-          setTypes(typesUrl);
-
-          let sameTypePokemons = [];
-          let promises = [];
-          
-          typesUrl.forEach(element => {
-              const promise = axios.get(`${element.url}`)
-                  .then((res) => {
-                      const updatedPokemonArray = res.data.pokemon.map(item => ({
-                          name: item.pokemon.name,
-                          url: item.pokemon.url
-                      }));
-                      sameTypePokemons = sameTypePokemons.concat(updatedPokemonArray);
-                      sameTypePokemons = Array.from(new Set(sameTypePokemons.map(item => JSON.stringify(item)))).map(item => JSON.parse(item));
-
-                      console.log(sameTypePokemons);
-                  })
-                  .catch((err) => {
-                      console.log(err);
-                  });
-              promises.push(promise);
-          });
-          
-          Promise.all(promises)
-              .then(() => {
-                  console.log(sameTypePokemons);
-                  setSameTypes(sameTypePokemons);
-              });
-    }
-
-    function get_stats(stats){
-        const statsInfo = stats.map(item => ({
-            name: item.stat.name,
-            value: item.base_stat
-          }));
-        
-        setStatData(statsInfo);
-    }
-
-
     return (
+        <>
+        {loading? (
+            <>
+            {!notFound? (
+                <div className="flex items-center justify-center min-h-screen">
+                <div className="flex items-center justify-center">
+                    <ClipLoader color="#000000" />
+                </div>
+            </div>
+            ) : (
+                <div className="flex items-center justify-center min-h-screen">
+                <div className="flex items-center justify-center text-center">
+                    POKEMON NOT FOUND
+                </div>
+            </div>
+            )}
+                
+            </>
+            ) : ( 
         <>
         <PokemonWidget key={params.name} name={params.name}/>
         <div className="pr-10 pl-10">
@@ -177,7 +116,7 @@ export default function Page({ params }: { params: { name: string } }) {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 h-5/6 w-4/5 mx-auto p-5">
                 {statData &&
                 statData.map((stat) =>
-                 <div className="row-span-1 col-span-1 justify-center content-center text-center">
+                <div className="row-span-1 col-span-1 justify-center content-center text-center">
                     
                     <pre>
                         {stat.name+" :\n"}
@@ -210,6 +149,7 @@ export default function Page({ params }: { params: { name: string } }) {
                 sameTypes.map((pokemon) => {if(pokemon.name != params.name) {return <PokemonWidget className="max-h-20 max-w-20" key={pokemon.name} name={pokemon.name}/>}})}
             </div>
         </div>
+        </>)}
         </>
     )
   }

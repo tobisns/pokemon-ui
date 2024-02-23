@@ -15,7 +15,6 @@ import {ClipLoader} from "react-spinners"
 
 export default function Page() {
 
-    const API = process.env.API;
     const limit = 20;
 
     const [items, setItems] = useState<PokemonData[]>([]);
@@ -153,7 +152,7 @@ export default function Page() {
             dataLength={items.length}
             next={fetchMoreData}
             hasMore={hasMore}
-            loader={<h4>Loading...</h4>}
+            loader={<h4 className="bg-black text-center text-white">Loading...</h4>}
             >
                 <div className="mt-21 sm:p-12 pt-20 sm:pt-[137px] bg-black min-h-screen">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 grid-rows-3 md:grid-rows-2 gap-4 h-5/6 w-4/5 mx-auto">
