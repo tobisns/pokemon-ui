@@ -1,10 +1,10 @@
-import PokemonData from "./pokemon";
+import PokemonData from './pokemon'
 
 export interface SpeciesData {
-    species: PokemonData;
+	species: PokemonData
 }
 
 export default interface EvoData {
-    evolFrom : SpeciesData[];
-    evolTo : SpeciesData[];
-} 
+	evolFrom: SpeciesData[]
+	evolTo: SpeciesData[]
+}
