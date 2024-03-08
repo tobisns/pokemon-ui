@@ -17,12 +17,12 @@ export const PokemonWidget = React.forwardRef<HTMLDivElement, Pokemon>(
 
 		if (name) {
 			axios
-				.get(`${API}/pokemon/${name}`, {})
+				.get(`${API}/pokemons/${name}`, {})
 				.then((res) => {
 					setImageUrl(
-						res.data.sprites.other['official-artwork']
-							.front_default,
+						res.data.image_url
 					)
+					console.log()
 					setLoading(false)
 				})
 				.catch((err) => {
@@ -32,7 +32,7 @@ export const PokemonWidget = React.forwardRef<HTMLDivElement, Pokemon>(
 
 		return (
 			<>
-				<a href={`/details/${name}`}>
+				<a href={`/userarea/details/${name}`}>
 					<div
 						key={name}
 						className={cn(

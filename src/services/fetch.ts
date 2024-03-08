@@ -10,10 +10,10 @@ export const fetch_pokemon_data = async (
 	const API = process.env.API
 	try {
 		const res: any = await axios.get(
-			`${API}/pokemon?limit=${limit}&offset=${index * limit}`,
+			`${API}/pokemons?limit=${limit}&offset=${index * limit}`,
 		)
-		if (res?.data?.results) {
-			return res.data.results
+		if (res?.data?.pokemons) {
+			return res.data.pokemons
 		}
 
 		return []
@@ -25,9 +25,9 @@ export const fetch_pokemon_data = async (
 export const fetch_types_data = async (): Promise<TypesData[]> => {
 	const API = process.env.API
 	try {
-		const res: any = await axios.get(`${API}/type`)
-		if (res?.data?.results) {
-			return res.data.results
+		const res: any = await axios.get(`${API}/types`)
+		if (res?.data?.types) {
+			return res.data.types
 		}
 		return []
 	} catch (err) {
@@ -38,29 +38,28 @@ export const fetch_types_data = async (): Promise<TypesData[]> => {
 export const fetch_same_types_pokemon_data = async (
 	typesUrl: TypesData[],
 ): Promise<PokemonData[]> => {
+	const API = process.env.API
 	try {
 		const rawSameTypeData = await Promise.all(
-			typesUrl.flatMap(async (e: any) => {
-				const res: any = await axios.get(`${e.url}`)
+			typesUrl.flatMap(async (e: TypesData) => {
+				const res: any = await axios.get(`${API}/types/${e.id}`)
 
-				if (res?.data?.pokemon) {
-					return res.data.pokemon.map((item) => ({
-						name: item.pokemon.name,
-						url: item.pokemon.url,
-					}))
+				if (res?.data?.pokemons) {
+					return res.data.pokemons
 				}
 
 				return []
 			}),
 		)
 
+		console.log(rawSameTypeData)
+
 		return Array.from(
-			new Set(
-				[]
-					.concat(...rawSameTypeData)
-					.map((item) => JSON.stringify(item)),
-			),
-		).map((item) => JSON.parse(item))
+			new Map(
+				[].concat(...rawSameTypeData)
+					.map(item => [item.name, item]) // Create a Map with name as key and item as value
+			).values()
+		);
 	} catch (err: any) {
 		console.log(err)
 	}
@@ -69,7 +68,7 @@ export const fetch_same_types_pokemon_data = async (
 export const fetch_pokemon_details = async (pokemon: PokemonData) => {
 	const API = process.env.API
 	try {
-		const res: any = await axios.get(`${API}/pokemon/${pokemon.name}`)
+		const res: any = await axios.get(`${API}/pokemons/${pokemon.name}`)
 		if (res?.data) {
 			return res
 		}
@@ -81,44 +80,28 @@ export const fetch_pokemon_details = async (pokemon: PokemonData) => {
 }
 
 export const fetch_evolution_chain = async (
-	speciesUrl: string,
-	base_pokemon: PokemonData,
+	evo_tree_id: string,
+	base_pokemon: string,
 ): Promise<EvoData> => {
+	const API = process.env.API
 	try {
-		const res0 = await axios.get(`${speciesUrl}`)
+		const res = await axios.get(`${API}/evolution_tree/${evo_tree_id}`)
 
-		if (res0?.data?.evolution_chain?.url) {
-			const res1 = await axios.get(res0.data.evolution_chain.url)
-
-			if (res1?.data.chain) {
-				let evoData = res1.data.chain
-				let evofrom = evoData.species.name != base_pokemon.name
+		if (res?.data?.evolution_data) {
+			const current = res.data.evolution_data.find((data :any) => data.pokemon_name == base_pokemon);
+			if (current) {
+				
 				const evoToDat = []
 				const evoFromDat = []
 
-				if (evofrom) {
-					evoFromDat.push(evoData)
-				} else {
-					evoToDat.push(evoData)
-				}
-
-				evoData = evoData.evolves_to
-
-				while (evoData.length > 0) {
-					if (evofrom) {
-						evofrom = !evoData.find(
-							(pokemon) =>
-								pokemon.species.name == base_pokemon.name,
-						)
-						if (evofrom) {
-							evoFromDat.push(...evoData)
-						}
-					} else {
-						evoToDat.push(...evoData)
+				res.data.evolution_data.forEach((e : any) => {
+					if (e.level < current.level) {
+						evoFromDat.push(e)
+					} else if (e.level > current.level) {
+						evoToDat.push(e)
 					}
-					evoData = evoData[0].evolves_to
-				}
-
+				});
+				
 				return { evolTo: evoToDat, evolFrom: evoFromDat }
 			}
 

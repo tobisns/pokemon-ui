@@ -1,7 +1,7 @@
 import PokemonData from './pokemon'
 
 export interface SpeciesData {
-	species: PokemonData
+	pokemon_name: string
 }
 
 export default interface EvoData {

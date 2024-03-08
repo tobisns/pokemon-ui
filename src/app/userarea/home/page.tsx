@@ -3,14 +3,14 @@
 import React from 'react'
 import { useState, useEffect } from 'react'
 import InfiniteScroll from 'react-infinite-scroll-component'
-import { PokemonWidget } from '../../components/widgets/pokemon-widget'
-import { get_filtered_pokemon } from '../../services/filter'
-import PokemonData from '../../interface/pokemon'
-import { fetch_pokemon_data, fetch_types_data } from '../../services/fetch'
-import { get_query_pokemon } from '../../services/query'
-import TypesData from '../../interface/types'
+import { PokemonWidget } from '../../../components/widgets/pokemon-widget'
+import { get_filtered_pokemon } from '../../../services/filter'
+import PokemonData from '../../../interface/pokemon'
+import { fetch_pokemon_data, fetch_types_data } from '../../../services/fetch'
+import { get_query_pokemon } from '../../../services/query'
+import TypesData from '../../../interface/types'
 import { ClipLoader } from 'react-spinners'
-import { authenticate } from '../../services/auth'
+import { authenticate } from '../../../services/auth'
 import { useRouter } from 'next/navigation'
 
 export default function Page() {
@@ -21,7 +21,7 @@ export default function Page() {
 	const [hasMore, setHasMore] = useState(true)
 	const [index, setIndex] = useState(1)
 	const [query, setQuery] = useState('')
-	const [filter, setFilter] = useState('')
+	const [filter, setFilter] = useState(0)
 	const [loading, setLoading] = useState(true)
 
 	const { push } = useRouter();
@@ -150,7 +150,7 @@ export default function Page() {
 			<>
 				{types &&
 					types.map((type) => (
-						<option value={type.name}>{type.name}</option>
+						<option value={type.id}>{type.name}</option>
 					))}
 			</>
 		)
@@ -162,7 +162,7 @@ export default function Page() {
 			setHasMore(false)
 		} else {
 			setItems([])
-			setFilter('')
+			setFilter(0)
 			setHasMore(true)
 		}
 	}

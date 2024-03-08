@@ -6,9 +6,9 @@ export const get_query_pokemon = async (
 ): Promise<PokemonData[]> => {
 	const API = process.env.API
 	try {
-		const res: any = await axios.get(`${API}/pokemon/${query}`)
+		const res: any = await axios.get(`${API}/pokemons?query=${query}`)
 		if (res?.data) {
-			return [res.data]
+			return res.data.pokemons
 		}
 
 		return []

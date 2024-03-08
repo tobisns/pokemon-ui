@@ -1,17 +1,18 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { PokemonWidget } from '../../../components/widgets/pokemon-widget'
+import { PokemonWidget } from '../../../../components/widgets/pokemon-widget'
 import {
 	fetch_evolution_chain,
 	fetch_pokemon_details,
 	fetch_same_types_pokemon_data,
-} from '../../../services/fetch'
-import PokemonData from '../../../interface/pokemon'
-import { SpeciesData } from '../../../interface/evolution'
+} from '../../../../services/fetch'
+import PokemonData from '../../../../interface/pokemon'
+import { SpeciesData } from '../../../../interface/evolution'
 import { ClipLoader } from 'react-spinners'
-import { authenticate } from '../../../services/auth'
+import { authenticate } from '../../../../services/auth'
 import { useRouter } from 'next/navigation';
+import { number } from 'yup'
 
 export default function Page({ params }: { params: PokemonData }) {
 	type TypeData = {
@@ -19,15 +20,19 @@ export default function Page({ params }: { params: PokemonData }) {
 	}
 
 	type StatData = {
-		name: string
-		value: number
+		hp: number
+		attack: number
+		defense: number
+		special_attack: number
+		special_defense: number
+		speed: number
 	}
 
 	const [evolveFrom, setEvolveFrom] = useState<SpeciesData[]>([])
 	const [evolveTo, setEvolveTo] = useState<SpeciesData[]>([])
 	const [sameTypes, setSameTypes] = useState<PokemonData[]>([])
 	const [types, setTypes] = useState<TypeData[]>([])
-	const [statData, setStatData] = useState<StatData[]>([])
+	const [statData, setStatData] = useState<StatData>()
 	const [weight, setWeight] = useState('')
 	const [height, setHeight] = useState('')
 	const [loading, setLoading] = useState(true)
@@ -46,30 +51,21 @@ export default function Page({ params }: { params: PokemonData }) {
 				setLoading(false)
 				setWeight(res.data.weight)
 				setHeight(res.data.height)
+				setStatData(res.data.stat)
 
-				const statsInfo = res.data.stats.map((item) => ({
-					name: item.stat.name,
-					value: item.base_stat,
-				}))
-				setStatData(statsInfo)
-
-				const typesUrl = res.data.types.map((item) => ({
-					url: item.type.url,
-					name: item.type.name,
-				}))
+				const typesUrl = res.data.types
 				setTypes(typesUrl)
 
 				const evoData = await fetch_evolution_chain(
-					res.data.species.url,
-					params,
+					res.data.evo_tree_id,
+					params.name,
 				)
 				if (evoData) {
 					setEvolveFrom(evoData.evolFrom)
 					setEvolveTo(evoData.evolTo)
 				}
 
-				const sameTypePokemons =
-					await fetch_same_types_pokemon_data(typesUrl)
+				const sameTypePokemons = await fetch_same_types_pokemon_data(typesUrl)
 				if (sameTypePokemons) {
 					setSameTypes(sameTypePokemons)
 				}
@@ -118,15 +114,43 @@ export default function Page({ params }: { params: PokemonData }) {
 	const spawnStats = () => {
 		return (
 			<>
-				{statData &&
-					statData.map((stat) => (
-						<div className="row-span-1 col-span-1 justify-center content-center text-center">
-							<pre>
-								{stat.name + ' :\n'}
-								{stat.value}
-							</pre>
-						</div>
-					))}
+				<div className="row-span-1 col-span-1 justify-center content-center text-center">
+					<pre>
+						{'Hit Point :\n'}
+						{statData.hp}
+					</pre>
+				</div>
+				<div className="row-span-1 col-span-1 justify-center content-center text-center">
+
+					<pre>
+						{'Attack :\n'}
+						{statData.attack}
+					</pre>
+				</div>
+				<div className="row-span-1 col-span-1 justify-center content-center text-center">
+					<pre>
+						{'Defense :\n'}
+						{statData.defense}
+					</pre>
+				</div>
+				<div className="row-span-1 col-span-1 justify-center content-center text-center">
+					<pre>
+						{'Special Attack :\n'}
+						{statData.special_attack}
+					</pre>
+				</div>
+				<div className="row-span-1 col-span-1 justify-center content-center text-center">
+					<pre>
+						{'Special Defense :\n'}
+						{statData.special_defense}
+					</pre>
+				</div>
+				<div className="row-span-1 col-span-1 justify-center content-center text-center">
+					<pre>
+						{'Speed :\n'}
+						{statData.speed}
+					</pre>
+				</div>
 			</>
 		)
 	}
@@ -136,16 +160,15 @@ export default function Page({ params }: { params: PokemonData }) {
 			<>
 				{pokemonData &&
 					pokemonData.map((pokemon) => {
-						if (pokemon.species.name != params.name) {
-							return (
-								<PokemonWidget
-									className="max-h-20 max-w-20"
-									key={pokemon.species.name}
-									name={pokemon.species.name}
-								/>
-							)
-						}
-					})}
+						return (
+							<PokemonWidget
+								className="max-h-20 max-w-20"
+								key={pokemon.pokemon_name}
+								name={pokemon.pokemon_name}
+							/>
+						)
+					})
+				}
 			</>
 		)
 	}
@@ -154,13 +177,17 @@ export default function Page({ params }: { params: PokemonData }) {
 		return (
 			<>
 				{pokemonData &&
-					pokemonData.map((pokemon) => (
-						<PokemonWidget
-							className="max-h-20 max-w-20"
-							key={pokemon.name}
-							name={pokemon.name}
-						/>
-					))}
+					pokemonData.map((pokemon) => {
+						if(pokemon.name != params.name){	
+						return (
+							<PokemonWidget
+								className="max-h-20 max-w-20"
+								key={pokemon.name}
+								name={pokemon.name}
+							/>
+						)
+					}
+				})}
 			</>
 		)
 	}

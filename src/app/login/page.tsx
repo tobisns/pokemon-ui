@@ -1,8 +1,18 @@
 'use client'
 
-import axios from "axios";
 import {Formik,Field,Form} from "formik";
 import { useRouter } from 'next/navigation'
+import { login } from "../../services/auth";
+import * as Yup from "yup";
+import toast, { Toaster } from "react-hot-toast";
+
+const SignupSchema = Yup.object().shape({
+    username: Yup.string()
+      .max(32, 'Too Long!')
+      .required('Required'),
+    password: Yup.string()
+      .required('Required'),
+  });
 
 export default function Login() {
     const { push } = useRouter();
@@ -11,33 +21,30 @@ export default function Login() {
         <div className="bg-[#c0c0c0]">
             <div
                 className="bg-gradient-to-b from-[rgba(209,209,209,0.2)] to-white flex flex-col justify-center items-center min-h-screen overflow-y-auto">
-            <div className="bg-[#820101] w-full md:w-[60vh] max-w-max-content h-fit-content rounded-lg flex flex-col justify-center items-center md:p-8 pt-5">
+            <div className="bg-black w-full md:w-[60vh] max-w-max-content h-fit-content rounded-lg flex flex-col justify-center items-center md:p-8 pt-5">
                 <h4 className="text-center text-white w-full md:w-20% text-lg">
-                    Log in to Monitoring
+                    Log in to Pokemon UI
                 </h4>
                 <hr className="bg-white w-full h-[1px] my-3 hidden md:block" />
-                    <Formik initialValues={{
+                    <Formik 
+                    initialValues={{
                         username: '',
                         password: '',
-                    }} onSubmit={async (values) => {
-                        axios.post('http://localhost:18080/users/login',{
-                            username:values.username,
-                            password:values.password,
-                        },{
-                            headers: {
-                                'Access-Control-Allow-Origin': '*',
-                                "Access-Control-Allow-Headers": "access-control-allow-origin, access-control-allow-headers",
-                                'Content-Type': 'application/json'
-                            },
-                            withCredentials: true
-                        }).then((res) => {
-                            console.log(res.headers)
-                            console.log(res.data.token)
-                            setTimeout(()=>{
-                                push("/home")
-                            },1000)
-                        }).catch(()=>{
-                        })
+                    }} 
+                    validationSchema={SignupSchema}
+                    onSubmit={async (values) => {
+                        try {
+                            const res = await login(values);
+                            console.log(res)
+                            if(res) {
+                                toast.success("Login Successful! 🎉")
+                                localStorage.setItem("isAdmin", res.is_admin)
+                                push("/userarea/home")
+                            }
+                        } catch (err) {
+                            console.log(err)
+                            toast.error("Login Failed 😞")
+                        }
                     }}
                     >
                         {({ errors, touched ,isSubmitting}) => (
@@ -66,6 +73,7 @@ export default function Login() {
                     </Formik>
                 </div>
             </div>
+            <Toaster/>
         </div>
 
     )
