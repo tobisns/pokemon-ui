@@ -1,9 +1,11 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import PokemonData from "../../interface/pokemon";
-import { fetch_pokemon_details } from "../../services/fetch";
+import { fetch_pokemon_details, fetch_types_data } from "../../services/fetch";
 import { AdminPopup } from "../popup/adminpopup";
 import { UpdatePokemonForm } from "../forms/update-pokemon-form";
 import { delete_pokemon } from "../../services/crud";
+import TypesData from "../../interface/types";
+import { AssignTypeForm } from "../forms/assign-type-form";
 
 interface AdminPokemonWidgetProps {
     pokemon: PokemonData
@@ -12,11 +14,17 @@ interface AdminPokemonWidgetProps {
 export const AdminPokemonWidget = (props : PropsWithChildren<AdminPokemonWidgetProps>) => {
     const [removed, setRemoved] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [isTypesPopupOpen, setIsTypesPopupOpen] = useState(false);
     const [pokemonDetails, setPokemonDetails] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+	const [types, setTypes] = useState<TypesData[]>([]);
 
     const togglePopup = () => {
         setIsPopupOpen(!isPopupOpen);
+    };
+
+    const toggleTypePopup = () => {
+        setIsTypesPopupOpen(!isTypesPopupOpen);
     };
 
     const deleting = () => {
@@ -35,6 +43,15 @@ export const AdminPokemonWidget = (props : PropsWithChildren<AdminPokemonWidgetP
         }
     }
 
+    const fetchTypesData = async () => {
+        try {
+			const typeData = await fetch_types_data()
+			setTypes(typeData)
+		} catch (err) {
+			console.log(err)
+		}
+    }
+
     const deletePokemon = async () => {
         try{
             const res = await delete_pokemon(pokemon.name);
@@ -50,14 +67,21 @@ export const AdminPokemonWidget = (props : PropsWithChildren<AdminPokemonWidgetP
         if (isPopupOpen) {
             fetchPokemonDetails();
         } else {
-        setPokemonDetails(null); // Reset/clear details when the popup is closed
+            setPokemonDetails(null); // Reset/clear details when the popup is closed
         }
 
         if (isDeleting) {
             deletePokemon();
             setIsDeleting(false);
         }
-    }, [isPopupOpen, isDeleting]);
+
+        if (isTypesPopupOpen) {
+            fetchPokemonDetails();
+            fetchTypesData();
+        } else {
+            setPokemonDetails(null); // Reset/clear details when the popup is closed
+        }
+    }, [isPopupOpen, isDeleting, isTypesPopupOpen]);
 
     const {pokemon} = props;
 
@@ -73,6 +97,7 @@ export const AdminPokemonWidget = (props : PropsWithChildren<AdminPokemonWidgetP
                     />
                 </div>
                 <h3 className="text-black text-base w-1/2 flex-1 pl-5">{pokemon.name}</h3>
+                <button className="mr-5" onClick={toggleTypePopup}>types</button>
                 <button className="mr-5" onClick={togglePopup}>edit</button>
                 <button onClick={deleting}>delete</button>
             </div>
@@ -80,6 +105,12 @@ export const AdminPokemonWidget = (props : PropsWithChildren<AdminPokemonWidgetP
             {isPopupOpen && pokemonDetails && (
                 <AdminPopup togglePopup={togglePopup}>
                 <UpdatePokemonForm initialValues={pokemonDetails} pokemon={pokemonDetails.name} />
+                </AdminPopup>
+            )}
+
+            {isTypesPopupOpen && pokemonDetails && (
+                <AdminPopup togglePopup={toggleTypePopup}>
+                    <AssignTypeForm types={types} assignedTypes={pokemonDetails.types} name={pokemonDetails.name}/>
                 </AdminPopup>
             )}
         </>
