@@ -65,10 +65,10 @@ export const fetch_same_types_pokemon_data = async (
 	}
 }
 
-export const fetch_pokemon_details = async (pokemon: PokemonData) => {
+export const fetch_pokemon_details = async (pokemon: string) => {
 	const API = process.env.API
 	try {
-		const res: any = await axios.get(`${API}/pokemons/${pokemon.name}`)
+		const res: any = await axios.get(`${API}/pokemons/${pokemon}`)
 		if (res?.data) {
 			return res
 		}

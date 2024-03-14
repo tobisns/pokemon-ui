@@ -1,4 +1,4 @@
 export default interface PokemonData {
 	name: string
-	url: string
+	image_url: string
 }

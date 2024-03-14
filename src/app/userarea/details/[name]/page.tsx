@@ -46,7 +46,7 @@ export default function Page({ params }: { params: PokemonData }) {
 
 	const fetch_data = async () => {
 		try {
-			const res: any = await fetch_pokemon_details(params)
+			const res: any = await fetch_pokemon_details(params.name)
 			if (res) {
 				setLoading(false)
 				setWeight(res.data.weight)
