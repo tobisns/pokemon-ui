@@ -1,5 +1,6 @@
 import axios from "axios"
 import TypesData from "../interface/types"
+import EvolTree from "../interface/evoltree"
 
 export const create_pokemon = async (values : any) => {
     const API = process.env.API
@@ -13,6 +14,7 @@ export const create_pokemon = async (values : any) => {
 		return null
 	} catch (err) {
 		console.log(err)
+		throw err;
 	}
 }
 
@@ -28,6 +30,7 @@ export const update_pokemon = async (pokemon : string, values : any) => {
 		return null
 	} catch (err) {
 		console.log(err)
+		throw err;
 	}
 }
 
@@ -42,6 +45,7 @@ export const delete_pokemon = async (pokemon : string) => {
 		return null
 	} catch (err) {
 		console.log(err)
+		throw err;
 	}
 }
 
@@ -91,5 +95,70 @@ export const edit_types = async (assignedTypes: TypesData[], assignTypes : Types
 		return []
 	} catch (err) {
 		console.log(err);
+		throw err;
+	}
+}
+
+export const create_tree = async(evotree : EvolTree) : Promise<EvolTree> => {
+    const API = process.env.API;
+	try {
+		const res = await axios.post(`${API}/evolution_tree`, evotree,
+		{withCredentials: true})
+		if(res?.data) {
+			return res.data
+		}
+
+		return {} as EvolTree
+	} catch (err) {
+		console.log(err);
+		throw err;
+	}
+}
+
+export const get_tree = async(id: number) : Promise<EvolTree> => {
+    const API = process.env.API;
+	try {
+		const res = await axios.get(`${API}/evolution_tree/${id}`,
+		{withCredentials: true})
+		if(res?.data) {
+			return res.data
+		}
+
+		return {} as EvolTree
+	} catch (err) {
+		console.log(err);
+		throw err;
+	}
+}
+
+export const insert_tree = async(evotree : EvolTree, id: number) : Promise<EvolTree> => {
+    const API = process.env.API;
+	try {
+		const res = await axios.post(`${API}/evolution_tree/${id}`, evotree,
+		{withCredentials: true})
+		if(res?.data) {
+			return res.data
+		}
+
+		return {} as EvolTree
+	} catch (err) {
+		console.log(err);
+		throw err;
+	}
+}
+
+export const delete_tree = async(names : any, id: number) : Promise<EvolTree> => {
+    const API = process.env.API;
+	try {
+		const res = await axios.delete(`${API}/evolution_tree/${id}`,
+		{data: names, withCredentials: true})
+		if(res?.data) {
+			return res.data
+		}
+
+		return {} as EvolTree
+	} catch (err) {
+		console.log(err);
+		throw err;
 	}
 }

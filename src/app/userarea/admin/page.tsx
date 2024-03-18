@@ -41,6 +41,10 @@ export default function Page() {
 	const init_page = async () => {
 		try {
 			const res: any = await authenticate()
+            if(!res) {
+                console.log("redirect");
+			    push('/login');
+            }
 			fetch_data();
 		} catch (err) {
 			console.log("redirect");

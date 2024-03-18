@@ -13,6 +13,7 @@ import { ClipLoader } from 'react-spinners'
 import { authenticate } from '../../../../services/auth'
 import { useRouter } from 'next/navigation';
 import { number } from 'yup'
+import { tree } from 'next/dist/build/templates/app-page'
 
 export default function Page({ params }: { params: PokemonData }) {
 	type TypeData = {
@@ -33,10 +34,12 @@ export default function Page({ params }: { params: PokemonData }) {
 	const [sameTypes, setSameTypes] = useState<PokemonData[]>([])
 	const [types, setTypes] = useState<TypeData[]>([])
 	const [statData, setStatData] = useState<StatData>()
+	const [treeId, setTreeId] = useState(-1)
 	const [weight, setWeight] = useState('')
 	const [height, setHeight] = useState('')
 	const [loading, setLoading] = useState(true)
 	const [notFound, setNotFound] = useState(false)
+	const [isAdmin, setIsAdmin] = useState(false)
 
 	const { push } = useRouter();
 
@@ -52,6 +55,7 @@ export default function Page({ params }: { params: PokemonData }) {
 				setWeight(res.data.weight)
 				setHeight(res.data.height)
 				setStatData(res.data.stat)
+				setTreeId(res.data.evo_tree_id)
 
 				const typesUrl = res.data.types
 				setTypes(typesUrl)
@@ -80,6 +84,7 @@ export default function Page({ params }: { params: PokemonData }) {
 	const init_page = async () => {
 		try {
 			const res: any = await authenticate()
+			setIsAdmin(res);
 			fetch_data();
 		} catch (err) {
 			console.log("redirect");
@@ -202,6 +207,17 @@ export default function Page({ params }: { params: PokemonData }) {
 					<div className="pr-10 pl-10">
 						<h1>Height: {height}</h1>
 						<h1>Weight: {weight}</h1>
+						{treeId && treeId != -1 ? 
+						(<>
+						<h1>Evolution Tree: {treeId}</h1>
+						{isAdmin && <button className='border-black border-2 p-1' onClick={() => {push(`/userarea/tree/${treeId}`)
+						}}>Edit Tree</button>}
+						</>) : 
+						(<>
+						{isAdmin && <button className='border-black border-2 p-1' onClick={() => {push(`/userarea/tree`)
+						}}>Create Tree</button>}
+						</>)
+						}
 						<h1>
 							Types:
 							{types && types.map((type) => <li>{type.name}</li>)}

@@ -108,7 +108,7 @@ export default function RootLayout({
 				<div className="flex flex-row min-h-screen min-w-full">
 					<div className="transition-all duration-300 min-h-full grow flex">
 						{isAdmin? renderSideBarAdmin() : renderSideBar()}
-						<div className="grow">{children}</div>
+						<div className="grow w-96">{children}</div>
 					</div>
 				</div>
 			</body>
