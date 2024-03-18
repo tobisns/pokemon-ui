@@ -21,22 +21,8 @@ export default function Page({ params }: { params : TreePageParam }) {
 	const { push, back } = useRouter();
 
     useEffect(() => {
-        init_page();
+        fetch_data();
       }, [])
-
-    const init_page = async () => {
-        try {
-            const res: any = await authenticate()
-            if(!res) {
-                console.log("redirect");
-			    push('/login');
-            }
-            fetch_data();
-        } catch (err) {
-            console.log("redirect");
-            push('/login');
-        }
-	}
   
     const fetch_data = async () => {
         try {

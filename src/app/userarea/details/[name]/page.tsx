@@ -44,7 +44,8 @@ export default function Page({ params }: { params: PokemonData }) {
 	const { push } = useRouter();
 
 	useEffect(() => {
-		init_page();
+		setIsAdmin(localStorage.getItem("isAdmin")==="true");
+		fetch_data();
 	}, [])
 
 	const fetch_data = async () => {
@@ -78,17 +79,6 @@ export default function Page({ params }: { params: PokemonData }) {
 			setNotFound(true)
 		} catch (err) {
 			console.log(err)
-		}
-	}
-
-	const init_page = async () => {
-		try {
-			const res: any = await authenticate()
-			setIsAdmin(res);
-			fetch_data();
-		} catch (err) {
-			console.log("redirect");
-			push('/login');
 		}
 	}
 

@@ -7,28 +7,41 @@ import SideTrigger from '../../components/buttons/side-trigger'
 import Sidebar from '../../components/navigations/sidebar'
 import SideButton from '../../components/buttons/side-button'
 import { authenticate } from '../../services/auth'
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function RootLayout({
 	children,
 }: {
 	children: React.ReactNode
 }) {
+	const pathname = usePathname();
 	const [sidebarOpen, setSidebarOpen] = useState(true)
 	const [isAdmin, setIsAdmin] = useState(false)
-	
-	const check_admin = async () => {
+
+    const { push } = useRouter();
+
+	useEffect(() => {
+		setIsAdmin(localStorage.getItem("isAdmin")==="true")
+	}, [])
+
+	useEffect(() => {
+		console.log(pathname)
+		init_page();
+	}, [pathname])
+
+	const init_page = async () => {
 		try {
 			const res: any = await authenticate()
-			console.log(res)
+            if(!res) {
+                console.log("redirect");
+			    push('/login');
+            }
 		} catch (err) {
-			console.log(err)
+			console.log("redirect");
+			push('/login');
 		}
 	}
 
-	useEffect(() => {
-		check_admin()
-		setIsAdmin(localStorage.getItem("isAdmin")==="true")
-	}, [])
 
 	const renderSideBar = () => {
 		return (

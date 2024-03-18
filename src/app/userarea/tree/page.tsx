@@ -13,24 +13,7 @@ export default function Page() {
     const [cards, setCards] = useState([]);
     const [forSubmitCards, setForSubmitCards] = useState([]);
 
-	const { push, back } = useRouter();
-
-    useEffect(() => {
-        init_page();
-      }, [])
-
-    const init_page = async () => {
-        try {
-            const res: any = await authenticate()
-            if(!res) {
-                console.log("redirect");
-			    push('/login');
-            }
-        } catch (err) {
-            console.log("redirect");
-            push('/login');
-        }
-	}
+	const { back } = useRouter();
 
     const createTree = async () => {
         const evolTree: EvolTree = {

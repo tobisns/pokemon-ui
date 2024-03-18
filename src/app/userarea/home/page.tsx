@@ -24,25 +24,12 @@ export default function Page() {
 	const [filter, setFilter] = useState(0)
 	const [loading, setLoading] = useState(true)
 
-	const { push } = useRouter();
-
 	useEffect(() => {
 		// refresh scroll
 		window.scrollTo(0, 0)
 		
-
-		init_page();
+		fetch_data();
 	}, [])
-
-	const init_page = async () => {
-		try {
-			const res: any = await authenticate()
-			fetch_data();
-		} catch (err) {
-			console.log("redirect");
-			push('/login');
-		}
-	}
 
 	const fetch_data = async () => {
 		try {
