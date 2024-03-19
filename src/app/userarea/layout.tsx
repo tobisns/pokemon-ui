@@ -32,7 +32,7 @@ export default function RootLayout({
 	const init_page = async () => {
 		try {
 			const res: any = await authenticate()
-            if(!res) {
+            if(!res && pathname == "/userarea/admin") {
                 console.log("redirect");
 			    push('/login');
             }

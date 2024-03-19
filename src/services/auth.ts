@@ -1,11 +1,10 @@
 import axios from "axios"
+import api from "./apiRequest"
 
 export const authenticate = async (): Promise<Boolean> => {
-	const API = process.env.API
 	try {
-		const res: any = await axios.get(
-			`${API}/users/authenticate`,
-			{withCredentials: true}
+		const res: any = await api.get(
+			`/users/authenticate`
 		)
 		if (res?.data?.is_admin) {
 			return res.data.is_admin
@@ -19,9 +18,8 @@ export const authenticate = async (): Promise<Boolean> => {
 }
 
 export const login = async (values : any): Promise<any> => {
-	const API = process.env.API
 	try {
-		const res: any = await axios.post('http://localhost:18080/users/login',
+		const res: any = await api.post('/users/login',
 		{
 			username:values.username,
 			password:values.password,
@@ -29,7 +27,6 @@ export const login = async (values : any): Promise<any> => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			withCredentials: true
 		})
 
 		if (res?.data) {

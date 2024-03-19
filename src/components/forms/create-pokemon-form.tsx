@@ -8,6 +8,7 @@ import { NumericIMaskInput } from '../inputs/form-inputs';
 const numberRegex = /^(0|[1-9][0-9]*(\.[0-9]*)?|0*\.[0-9]*[1-9][0-9]*)$/;
 
 const formValidationSchema = Yup.object().shape({
+    name: Yup.string().required('Required'),
     weight: Yup.string().matches(numberRegex, "not valid").required('Required'),
     height: Yup.string().matches(numberRegex, "not valid").required('Required'),
     stat: Yup.object().shape({
@@ -62,6 +63,9 @@ export const CreatePokemonForm = () => {
                             <label htmlFor="name" className="sub-1">Name</label>
                             <Field type="text" name="name" placeholder="Name" id="name"
                                     className="sub-1 rounded px-2 py-1 border border-black bg-white text-black" />
+                                    {errors.name && touched.name ? (
+                                <p className="tag text-red-500">{errors.name}</p>
+                            ) : null}
                         </div>
                         <div className="flex flex-col mb-3">
                             <label htmlFor="url" className="sub-1">Image Url</label>
